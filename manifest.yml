@@ -1,0 +1,12 @@
+applications:
+  - name: tcpf-egress-tester
+    memory: 256M
+    disk_quota: 512M
+    instances: 1
+    buildpacks:
+      - python_buildpack
+    command: uvicorn main:app --host 0.0.0.0 --port $PORT
+    health-check-type: http
+    health-check-http-endpoint: /docs
+    env:
+      PYTHONUNBUFFERED: "true"
