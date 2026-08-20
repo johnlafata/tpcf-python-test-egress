@@ -94,6 +94,44 @@ cf push
 
 Once deployed, replace `localhost:8000` with your CF app URL.
 
+### Application Security Groups
+
+This repo includes two ASG rule files:
+
+| File | Purpose |
+|------|---------|
+| `default-deny-1433.json` | Allows egress on all TCP/UDP ports except `1433` |
+| `sql-access-asg.json` | Allows TCP egress to a specific SQL Server host/CIDR on `1433` |
+
+**Create the security groups:**
+
+```bash
+cf create-security-group default-deny-1433 default-deny-1433.json
+cf create-security-group sql-access sql-access-asg.json
+```
+
+Before creating `sql-access-asg.json`, replace `<sql-server-ip-or-cidr>` with your actual SQL Server destination.
+
+**Update an existing security group's rules** (e.g. after editing a JSON file):
+
+```bash
+cf update-security-group default-deny-1433 default-deny-1433.json
+cf update-security-group sql-access sql-access-asg.json
+```
+
+**Bind the groups to your space** so they apply to running/staging apps:
+
+```bash
+cf bind-security-group default-deny-1433 YOUR_ORG YOUR_SPACE
+cf bind-security-group sql-access YOUR_ORG YOUR_SPACE
+```
+
+Restage or restart the app for the updated groups to take effect:
+
+```bash
+cf restage tcp-egress-tester
+```
+
 ## Deactivate the virtual environment
 
 ```bash
